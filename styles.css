@@ -223,7 +223,8 @@ textarea:focus {
 .chart-drop {
   position: relative;
   display: grid;
-  min-height: 210px;
+  height: 168px;
+  min-height: 0;
   overflow: hidden;
   place-items: center;
   border: 1px dashed rgba(15, 118, 110, 0.55);
@@ -253,7 +254,8 @@ textarea:focus {
 .chart-drop img {
   width: 100%;
   height: 100%;
-  min-height: 210px;
+  min-height: 0;
+  max-height: 100%;
   object-fit: contain;
   background: #101817;
 }
@@ -378,7 +380,8 @@ textarea:focus {
 
 .record-chart {
   width: 100%;
-  max-height: 280px;
+  height: 220px;
+  max-height: 220px;
   border-radius: 8px;
   background: #101817;
   object-fit: contain;
@@ -397,7 +400,8 @@ textarea:focus {
 
 .record-similar-chart img {
   width: 100%;
-  max-height: 220px;
+  height: 180px;
+  max-height: 180px;
   border-radius: 8px;
   background: #101817;
   object-fit: contain;
@@ -449,14 +453,49 @@ textarea:focus {
   }
 
   .chart-drop {
-    min-height: 300px;
+    height: 240px;
   }
 
   .chart-drop img {
-    min-height: 300px;
+    min-height: 0;
+  }
+
+  .record-chart {
+    height: 280px;
+    max-height: 280px;
+  }
+
+  .record-similar-chart img {
+    height: 220px;
+    max-height: 220px;
   }
 
   .record-prices {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 430px) {
+  .app-shell {
+    max-width: 390px;
+    padding: 14px 12px 34px;
+  }
+
+  .section {
+    padding: 15px;
+  }
+
+  .chart-drop {
+    height: 156px;
+  }
+
+  .record-chart {
+    height: 196px;
+    max-height: 196px;
+  }
+
+  .record-similar-chart img {
+    height: 156px;
+    max-height: 156px;
   }
 }

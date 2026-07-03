@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="매수 수첩" />
+    <title>매수 수첩</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="assets/bunnyeap-symbol-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/bunnyeap-symbol-192.png" />
+    <link rel="stylesheet" href="styles.css?v=7" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img src="assets/bunnyeap-symbol-tight.png" alt="Bunnyeap" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Bunnyeap Trading Note</p>
+            <h1>매수 수첩</h1>
+          </div>
+        </div>
+        <time id="todayLabel" class="date-pill"></time>
+      </header>
+
+      <main>
+        <section class="section checklist-section" aria-labelledby="checklistTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h2 id="checklistTitle">매수 전 체크</h2>
+            </div>
+            <span id="checkProgress" class="progress-badge">0/5</span>
+          </div>
+          <div id="checklist" class="checklist" aria-describedby="gateMessage"></div>
+          <p id="gateMessage" class="gate-message">체크가 모두 끝나면 기록창이 열립니다.</p>
+        </section>
+
+        <section class="section trade-section" aria-labelledby="tradeTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2 id="tradeTitle">진입 기록</h2>
+            </div>
+            <span id="lockState" class="status-pill">잠김</span>
+          </div>
+
+          <form id="tradeForm" autocomplete="off">
+            <fieldset id="tradeFields" disabled>
+              <label class="field">
+                <span>종목명</span>
+                <input id="symbolInput" name="symbol" type="text" placeholder="예: 삼성전자" required />
+              </label>
+
+              <div class="field">
+                <span>차트</span>
+                <label class="chart-drop" for="chartInput">
+                  <input id="chartInput" name="chart" type="file" accept="image/*" />
+                  <span class="chart-empty">차트 스크린샷 선택</span>
+                  <img id="chartPreview" alt="선택한 차트 미리보기" hidden />
+                </label>
+              </div>
+
+              <div class="field">
+                <span>비슷한 유형 차트</span>
+                <label class="chart-drop" for="similarChartInput">
+                  <input id="similarChartInput" name="similarChart" type="file" accept="image/*" />
+                  <span class="chart-empty similar-chart-empty">비슷한 유형 차트 선택</span>
+                  <img id="similarChartPreview" alt="선택한 비슷한 유형 차트 미리보기" hidden />
+                </label>
+              </div>
+
+              <label class="field">
+                <span>매수 이유</span>
+                <textarea
+                  id="reasonInput"
+                  name="reason"
+                  rows="5"
+                  placeholder="이 종목을 지금 사려는 이유"
+                  required
+                ></textarea>
+              </label>
+
+              <div class="price-grid">
+                <label class="field">
+                  <span>매수가</span>
+                  <input id="buyPriceInput" name="buyPrice" type="number" min="0" step="0.01" inputmode="decimal" required />
+                </label>
+                <label class="field">
+                  <span>매수 가능금액</span>
+                  <input id="buyAmountInput" name="buyAmount" type="number" min="0" step="1000" inputmode="numeric" required />
+                </label>
+                <label class="field">
+                  <span>예상 매도가</span>
+                  <input id="targetPriceInput" name="targetPrice" type="number" min="0" step="0.01" inputmode="decimal" required />
+                </label>
+                <label class="field">
+                  <span>손절가</span>
+                  <input id="stopPriceInput" name="stopPrice" type="number" min="0" step="0.01" inputmode="decimal" required />
+                </label>
+              </div>
+
+              <label class="field">
+                <span>손절 이유</span>
+                <textarea
+                  id="stopReasonInput"
+                  name="stopReason"
+                  rows="4"
+                  placeholder="이 가격이 깨지면 왜 나와야 하는지"
+                  required
+                ></textarea>
+              </label>
+
+              <output id="returnPreview" class="return-preview">예상 수익률 0.00%</output>
+
+              <div class="action-row">
+                <button class="button secondary" type="button" id="resetButton">초기화</button>
+                <button class="button primary" type="submit">기록 저장</button>
+              </div>
+            </fieldset>
+          </form>
+        </section>
+
+        <section class="section notes-section" aria-labelledby="notesTitle">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Archive</p>
+              <h2 id="notesTitle">저장한 기록</h2>
+            </div>
+            <button id="clearRecordsButton" class="icon-button" type="button" title="전체 삭제" aria-label="전체 삭제">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div id="recordsList" class="records-list"></div>
+          <p id="emptyState" class="empty-state">아직 저장한 기록이 없습니다.</p>
+        </section>
+      </main>
+    </div>
+
+    <template id="recordTemplate">
+      <article class="record-card">
+        <div class="record-head">
+          <div>
+            <h3 class="record-symbol"></h3>
+            <p class="record-date"></p>
+          </div>
+          <button class="delete-record" type="button" title="기록 삭제" aria-label="기록 삭제">×</button>
+        </div>
+        <img class="record-chart" alt="저장한 차트" />
+        <figure class="record-similar-chart" hidden>
+          <figcaption>비슷한 유형 차트</figcaption>
+          <img alt="저장한 비슷한 유형 차트" />
+        </figure>
+        <p class="record-reason"></p>
+        <div class="record-stop-note">
+          <span>손절 이유</span>
+          <p class="record-stop-reason"></p>
+        </div>
+        <dl class="record-prices">
+          <div>
+            <dt>매수가</dt>
+            <dd class="record-buy"></dd>
+          </div>
+          <div>
+            <dt>매수 가능금액</dt>
+            <dd class="record-amount"></dd>
+          </div>
+          <div>
+            <dt>예상 매도가</dt>
+            <dd class="record-target"></dd>
+          </div>
+          <div>
+            <dt>손절가</dt>
+            <dd class="record-stop"></dd>
+          </div>
+          <div>
+            <dt>예상 수익률</dt>
+            <dd class="record-return"></dd>
+          </div>
+        </dl>
+      </article>
+    </template>
+
+    <script src="app.js?v=7" defer></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+assets/logo-source.png
+assets/bunnyeap-wordmark.png
+assets/bunnyeap-logo.png
+assets/bunnyeap-logo-192.png
+assets/bunnyeap-logo-512.png
+icons/
+
+.DS_Store
+Thumbs.db
+*.log

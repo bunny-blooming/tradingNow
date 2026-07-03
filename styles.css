@@ -223,7 +223,7 @@ textarea:focus {
 .chart-drop {
   position: relative;
   display: grid;
-  height: 168px;
+  height: 150px;
   min-height: 0;
   overflow: hidden;
   place-items: center;
@@ -380,8 +380,8 @@ textarea:focus {
 
 .record-chart {
   width: 100%;
-  height: 220px;
-  max-height: 220px;
+  height: 190px;
+  max-height: 190px;
   border-radius: 8px;
   background: #101817;
   object-fit: contain;
@@ -400,8 +400,8 @@ textarea:focus {
 
 .record-similar-chart img {
   width: 100%;
-  height: 180px;
-  max-height: 180px;
+  height: 150px;
+  max-height: 150px;
   border-radius: 8px;
   background: #101817;
   object-fit: contain;
@@ -453,7 +453,7 @@ textarea:focus {
   }
 
   .chart-drop {
-    height: 240px;
+    height: 210px;
   }
 
   .chart-drop img {
@@ -461,13 +461,13 @@ textarea:focus {
   }
 
   .record-chart {
-    height: 280px;
-    max-height: 280px;
+    height: 250px;
+    max-height: 250px;
   }
 
   .record-similar-chart img {
-    height: 220px;
-    max-height: 220px;
+    height: 190px;
+    max-height: 190px;
   }
 
   .record-prices {
@@ -486,16 +486,16 @@ textarea:focus {
   }
 
   .chart-drop {
-    height: 156px;
+    height: 132px;
   }
 
   .record-chart {
-    height: 196px;
-    max-height: 196px;
+    height: 168px;
+    max-height: 168px;
   }
 
   .record-similar-chart img {
-    height: 156px;
-    max-height: 156px;
+    height: 132px;
+    max-height: 132px;
   }
 }

@@ -2,11 +2,12 @@ const CHECK_ITEMS = [
   "오늘 매매 계획에 있던 종목인가?",
   "손절 기준을 숫자로 정했는가?",
   "매수 이유를 한 문장으로 설명할 수 있는가?",
-  "예상 수익과 손실 비율이 납득되는가?",
+  "예상 수익과 손실 비율을 받아들일 수 있는가?",
   "지금 급하게 따라 사는 상태가 아닌가?",
 ];
 
 const STORAGE_KEY = "trading-note-records-v1";
+const CHART_IMAGE_MAX_WIDTH = 720;
 
 const checklist = document.querySelector("#checklist");
 const checkProgress = document.querySelector("#checkProgress");
@@ -30,13 +31,19 @@ const stopPriceInput = document.querySelector("#stopPriceInput");
 const stopReasonInput = document.querySelector("#stopReasonInput");
 const returnPreview = document.querySelector("#returnPreview");
 const resetButton = document.querySelector("#resetButton");
+const toggleRecordsButton = document.querySelector("#toggleRecordsButton");
+const recordsPanel = document.querySelector("#recordsPanel");
 const recordsList = document.querySelector("#recordsList");
-const recordTemplate = document.querySelector("#recordTemplate");
+const recordDetail = document.querySelector("#recordDetail");
+const recordListItemTemplate = document.querySelector("#recordListItemTemplate");
+const recordDetailTemplate = document.querySelector("#recordDetailTemplate");
 const emptyState = document.querySelector("#emptyState");
 const clearRecordsButton = document.querySelector("#clearRecordsButton");
 
 let chartDataUrl = "";
 let similarChartDataUrl = "";
+let recordsOpen = false;
+let selectedRecordId = "";
 
 todayLabel.textContent = new Intl.DateTimeFormat("ko-KR", {
   month: "short",
@@ -76,6 +83,14 @@ function calculateReturn(buyPrice, targetPrice) {
   return ((target - buy) / buy) * 100;
 }
 
+function createRecordId() {
+  if (crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 function renderChecklist() {
   checklist.innerHTML = "";
   CHECK_ITEMS.forEach((text, index) => {
@@ -98,7 +113,9 @@ function updateChecklistState() {
   tradeFields.disabled = !ready;
   lockState.textContent = ready ? "작성 가능" : "잠김";
   lockState.classList.toggle("ready", ready);
-  gateMessage.textContent = ready ? "좋습니다. 이제 매수 이유를 기록하세요." : "체크가 모두 끝나면 기록창이 열립니다.";
+  gateMessage.textContent = ready
+    ? "좋습니다. 이제 매수 이유를 기록하세요."
+    : "체크가 모두 끝나면 기록창이 열립니다.";
 }
 
 function updateReturnPreview() {
@@ -155,13 +172,13 @@ function resizeImage(file) {
       const image = new Image();
       image.onerror = () => reject(new Error("지원하지 않는 이미지입니다."));
       image.onload = () => {
-        const maxWidth = 820;
-        const scale = Math.min(1, maxWidth / image.width);
+        const scale = Math.min(1, CHART_IMAGE_MAX_WIDTH / image.width);
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(image.width * scale);
         canvas.height = Math.round(image.height * scale);
 
         const context = canvas.getContext("2d");
+        context.imageSmoothingQuality = "high";
         context.drawImage(image, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL("image/jpeg", 0.72));
       };
@@ -209,38 +226,98 @@ async function handleSimilarChartChange(event) {
   }
 }
 
-function renderRecords() {
-  const records = getRecords();
+function deleteRecord(recordId) {
+  if (!confirm("이 기록을 삭제할까요?")) {
+    return;
+  }
+
+  saveRecords(getRecords().filter((item) => item.id !== recordId));
+  selectedRecordId = "";
+  renderRecords();
+}
+
+function renderRecordList(records) {
   recordsList.innerHTML = "";
-  emptyState.hidden = records.length > 0;
+  recordDetail.innerHTML = "";
+  recordsList.hidden = false;
+  recordDetail.hidden = true;
 
   records.forEach((record) => {
-    const node = recordTemplate.content.firstElementChild.cloneNode(true);
-    const rate = calculateReturn(record.buyPrice, record.targetPrice);
-    const sign = rate > 0 ? "+" : "";
-
-    node.querySelector(".record-symbol").textContent = record.symbol;
-    node.querySelector(".record-date").textContent = record.createdAt;
-    node.querySelector(".record-chart").src = record.chart;
-    const similarChart = node.querySelector(".record-similar-chart");
-    if (record.similarChart) {
-      similarChart.hidden = false;
-      similarChart.querySelector("img").src = record.similarChart;
-    }
-    node.querySelector(".record-reason").textContent = record.reason;
-    node.querySelector(".record-stop-reason").textContent = record.stopReason || "-";
-    node.querySelector(".record-buy").textContent = formatPrice(record.buyPrice);
-    node.querySelector(".record-amount").textContent = `${formatPrice(record.buyAmount)}원`;
-    node.querySelector(".record-target").textContent = formatPrice(record.targetPrice);
-    node.querySelector(".record-stop").textContent = formatPrice(record.stopPrice);
-    node.querySelector(".record-return").textContent = `${sign}${rate.toFixed(2)}%`;
-    node.querySelector(".delete-record").addEventListener("click", () => {
-      saveRecords(getRecords().filter((item) => item.id !== record.id));
+    const node = recordListItemTemplate.content.firstElementChild.cloneNode(true);
+    const button = node.querySelector(".record-list-button");
+    node.querySelector(".record-list-symbol").textContent = record.symbol || "종목명 없음";
+    node.querySelector(".record-list-date").textContent = record.createdAt || "-";
+    node.querySelector(".record-list-buy").textContent = formatPrice(record.buyPrice);
+    node.querySelector(".record-list-target").textContent = formatPrice(record.targetPrice);
+    button.addEventListener("click", () => {
+      selectedRecordId = record.id;
       renderRecords();
     });
 
     recordsList.append(node);
   });
+}
+
+function renderRecordDetail(record) {
+  recordsList.innerHTML = "";
+  recordsList.hidden = true;
+  recordDetail.innerHTML = "";
+  recordDetail.hidden = false;
+
+  const node = recordDetailTemplate.content.firstElementChild.cloneNode(true);
+  const rate = calculateReturn(record.buyPrice, record.targetPrice);
+  const sign = rate > 0 ? "+" : "";
+
+  node.querySelector(".record-symbol").textContent = record.symbol || "종목명 없음";
+  node.querySelector(".record-date").textContent = record.createdAt || "-";
+  node.querySelector(".record-chart").src = record.chart;
+
+  const similarChart = node.querySelector(".record-similar-chart");
+  if (record.similarChart) {
+    similarChart.hidden = false;
+    similarChart.querySelector("img").src = record.similarChart;
+  }
+
+  node.querySelector(".record-reason").textContent = record.reason || "-";
+  node.querySelector(".record-stop-reason").textContent = record.stopReason || "-";
+  node.querySelector(".record-buy").textContent = formatPrice(record.buyPrice);
+  node.querySelector(".record-amount").textContent = `${formatPrice(record.buyAmount)}원`;
+  node.querySelector(".record-target").textContent = formatPrice(record.targetPrice);
+  node.querySelector(".record-stop").textContent = formatPrice(record.stopPrice);
+  node.querySelector(".record-return").textContent = `${sign}${rate.toFixed(2)}%`;
+  node.querySelector(".back-record").addEventListener("click", () => {
+    selectedRecordId = "";
+    renderRecords();
+  });
+  node.querySelector(".delete-record").addEventListener("click", () => deleteRecord(record.id));
+
+  recordDetail.append(node);
+}
+
+function renderRecords() {
+  const records = getRecords();
+  const hasRecords = records.length > 0;
+  const selectedRecord = records.find((record) => record.id === selectedRecordId);
+
+  emptyState.hidden = hasRecords;
+  toggleRecordsButton.disabled = !hasRecords;
+  toggleRecordsButton.textContent = recordsOpen ? "기록 닫기" : `기록 보기 (${records.length})`;
+  recordsPanel.hidden = !recordsOpen || !hasRecords;
+
+  if (!recordsOpen || !hasRecords) {
+    selectedRecordId = "";
+    recordsList.innerHTML = "";
+    recordDetail.innerHTML = "";
+    return;
+  }
+
+  if (selectedRecord) {
+    renderRecordDetail(selectedRecord);
+    return;
+  }
+
+  selectedRecordId = "";
+  renderRecordList(records);
 }
 
 function handleSubmit(event) {
@@ -252,7 +329,7 @@ function handleSubmit(event) {
   }
 
   const record = {
-    id: crypto.randomUUID(),
+    id: createRecordId(),
     symbol: symbolInput.value.trim(),
     reason: reasonInput.value.trim(),
     buyPrice: buyPriceInput.value,
@@ -282,6 +359,8 @@ function handleSubmit(event) {
   }
 
   saveRecords([record, ...getRecords()]);
+  recordsOpen = true;
+  selectedRecordId = record.id;
   resetTradeForm();
   resetChecklist();
   renderRecords();
@@ -294,8 +373,16 @@ function clearRecords() {
 
   if (confirm("저장한 기록을 모두 삭제할까요?")) {
     saveRecords([]);
+    recordsOpen = false;
+    selectedRecordId = "";
     renderRecords();
   }
+}
+
+function toggleRecords() {
+  recordsOpen = !recordsOpen;
+  selectedRecordId = "";
+  renderRecords();
 }
 
 function registerServiceWorker() {
@@ -319,4 +406,5 @@ targetPriceInput.addEventListener("input", updateReturnPreview);
 stopPriceInput.addEventListener("input", updateReturnPreview);
 tradeForm.addEventListener("submit", handleSubmit);
 resetButton.addEventListener("click", resetTradeForm);
+toggleRecordsButton.addEventListener("click", toggleRecords);
 clearRecordsButton.addEventListener("click", clearRecords);

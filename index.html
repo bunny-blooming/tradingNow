@@ -10,7 +10,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="assets/bunnyeap-symbol-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="assets/bunnyeap-symbol-192.png" />
-    <link rel="stylesheet" href="styles.css?v=9" />
+    <link rel="stylesheet" href="styles.css?v=18" />
   </head>
   <body>
     <div class="app-shell">
@@ -78,7 +78,7 @@
                   id="reasonInput"
                   name="reason"
                   rows="5"
-                  placeholder="이 종목을 지금 사려는 이유"
+                  placeholder="이 종목을 지금 보려는 이유"
                   required
                 ></textarea>
               </label>
@@ -108,7 +108,7 @@
                   id="stopReasonInput"
                   name="stopReason"
                   rows="4"
-                  placeholder="이 가격이 깨지면 왜 나와야 하는지"
+                  placeholder="어떤 가격이나 조건이면 틀렸다고 볼지"
                   required
                 ></textarea>
               </label>
@@ -129,35 +129,70 @@
               <p class="eyebrow">Archive</p>
               <h2 id="notesTitle">저장한 기록</h2>
             </div>
-            <button id="clearRecordsButton" class="icon-button" type="button" title="전체 삭제" aria-label="전체 삭제">
-              <span aria-hidden="true">×</span>
-            </button>
+            <div class="section-actions">
+              <button id="toggleRecordsButton" class="button secondary small" type="button">기록 보기</button>
+              <button id="clearRecordsButton" class="icon-button" type="button" title="전체 삭제" aria-label="전체 삭제">
+                <span aria-hidden="true">x</span>
+              </button>
+            </div>
           </div>
-          <div id="recordsList" class="records-list"></div>
+
+          <div id="recordsPanel" class="records-panel" hidden>
+            <div id="recordsList" class="records-list"></div>
+            <div id="recordDetail" class="record-detail" hidden></div>
+          </div>
           <p id="emptyState" class="empty-state">아직 저장한 기록이 없습니다.</p>
         </section>
       </main>
     </div>
 
-    <template id="recordTemplate">
+    <template id="recordListItemTemplate">
+      <article class="record-list-card">
+        <button class="record-list-button" type="button">
+          <span class="record-list-main">
+            <strong class="record-list-symbol"></strong>
+            <span class="record-list-date"></span>
+          </span>
+          <span class="record-list-sub">
+            <span>매수가 <b class="record-list-buy"></b></span>
+            <span>목표 <b class="record-list-target"></b></span>
+          </span>
+        </button>
+      </article>
+    </template>
+
+    <template id="recordDetailTemplate">
       <article class="record-card">
+        <div class="record-detail-actions">
+          <button class="button secondary small back-record" type="button">목록</button>
+          <button class="delete-record" type="button" title="기록 삭제" aria-label="기록 삭제">x</button>
+        </div>
+
         <div class="record-head">
           <div>
             <h3 class="record-symbol"></h3>
             <p class="record-date"></p>
           </div>
-          <button class="delete-record" type="button" title="기록 삭제" aria-label="기록 삭제">×</button>
         </div>
-        <img class="record-chart" alt="저장한 차트" />
+
+        <div class="record-chart-frame">
+          <img class="record-chart" alt="저장한 차트" />
+        </div>
+
         <figure class="record-similar-chart" hidden>
           <figcaption>비슷한 유형 차트</figcaption>
-          <img alt="저장한 비슷한 유형 차트" />
+          <div class="record-chart-frame">
+            <img alt="저장한 비슷한 유형 차트" />
+          </div>
         </figure>
+
         <p class="record-reason"></p>
+
         <div class="record-stop-note">
           <span>손절 이유</span>
           <p class="record-stop-reason"></p>
         </div>
+
         <dl class="record-prices">
           <div>
             <dt>매수가</dt>
@@ -183,6 +218,6 @@
       </article>
     </template>
 
-    <script src="app.js?v=9" defer></script>
+    <script src="app.js?v=18" defer></script>
   </body>
 </html>

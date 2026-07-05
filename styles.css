@@ -11,6 +11,8 @@
   --accent: #f59e0b;
   --danger: #c2410c;
   --shadow: 0 18px 45px rgba(35, 55, 51, 0.12);
+  --chart-shift-x: 4px;
+  --chart-zoom-x: 1.12;
   font-family:
     Pretendard,
     -apple-system,
@@ -21,6 +23,10 @@
 
 * {
   box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 body {
@@ -136,9 +142,18 @@ main {
   margin-bottom: 16px;
 }
 
-.checklist {
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checklist,
+fieldset,
+.records-panel,
+.records-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .check-item {
@@ -175,8 +190,6 @@ main {
 }
 
 fieldset {
-  display: grid;
-  gap: 15px;
   min-width: 0;
   margin: 0;
   border: 0;
@@ -251,13 +264,19 @@ textarea:focus {
   pointer-events: none;
 }
 
-.chart-drop img {
+.chart-drop img,
+.record-chart,
+.record-similar-chart img {
+  display: block;
   width: 100%;
   height: 100%;
-  min-height: 0;
+  max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
-  background: #101817;
+  object-fit: fill;
+  object-position: center center;
+  transform: translateX(var(--chart-shift-x)) scaleX(var(--chart-zoom-x));
+  transform-origin: center center;
+  background: #fff;
 }
 
 .price-grid,
@@ -291,6 +310,12 @@ textarea:focus {
   font-weight: 900;
 }
 
+.button.small {
+  min-height: 42px;
+  padding: 0 13px;
+  white-space: nowrap;
+}
+
 .button.primary {
   background: var(--primary);
   color: white;
@@ -308,33 +333,88 @@ textarea:focus {
   color: var(--muted);
 }
 
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .icon-button,
 .delete-record {
   display: inline-grid;
   width: 42px;
   min-height: 42px;
   place-items: center;
-  font-size: 25px;
+  font-size: 22px;
   line-height: 1;
 }
 
-.records-list {
-  display: grid;
-  gap: 12px;
-}
-
+.record-list-card,
 .record-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfcfb;
+}
+
+.record-list-button {
+  display: grid;
+  width: 100%;
+  min-height: 76px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  padding: 13px;
+  text-align: left;
+}
+
+.record-list-main,
+.record-list-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.record-list-symbol {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.record-list-date {
+  flex: 0 0 auto;
+}
+
+.record-list-date,
+.record-list-sub {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.record-list-sub {
+  margin-top: 6px;
+}
+
+.record-card {
   padding: 13px;
 }
 
+.record-detail-actions,
 .record-head {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.record-detail-actions {
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.record-head {
   margin-bottom: 10px;
 }
 
@@ -378,13 +458,13 @@ textarea:focus {
   margin-top: 4px;
 }
 
-.record-chart {
+.record-chart-frame {
   width: 100%;
   height: 190px;
   max-height: 190px;
+  overflow: hidden;
   border-radius: 8px;
-  background: #101817;
-  object-fit: contain;
+  background: #fff;
 }
 
 .record-similar-chart {
@@ -398,13 +478,9 @@ textarea:focus {
   font-weight: 900;
 }
 
-.record-similar-chart img {
-  width: 100%;
+.record-similar-chart .record-chart-frame {
   height: 150px;
   max-height: 150px;
-  border-radius: 8px;
-  background: #101817;
-  object-fit: contain;
 }
 
 .record-prices {
@@ -456,16 +532,12 @@ textarea:focus {
     height: 210px;
   }
 
-  .chart-drop img {
-    min-height: 0;
-  }
-
-  .record-chart {
+  .record-chart-frame {
     height: 250px;
     max-height: 250px;
   }
 
-  .record-similar-chart img {
+  .record-similar-chart .record-chart-frame {
     height: 190px;
     max-height: 190px;
   }
@@ -476,6 +548,11 @@ textarea:focus {
 }
 
 @media (max-width: 430px) {
+  :root {
+    --chart-shift-x: 4px;
+    --chart-zoom-x: 1.16;
+  }
+
   .app-shell {
     max-width: 390px;
     padding: 14px 12px 34px;
@@ -485,16 +562,20 @@ textarea:focus {
     padding: 15px;
   }
 
+  .section-heading {
+    align-items: start;
+  }
+
   .chart-drop {
     height: 132px;
   }
 
-  .record-chart {
+  .record-chart-frame {
     height: 168px;
     max-height: 168px;
   }
 
-  .record-similar-chart img {
+  .record-similar-chart .record-chart-frame {
     height: 132px;
     max-height: 132px;
   }

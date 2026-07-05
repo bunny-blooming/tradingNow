@@ -1,8 +1,8 @@
-const CACHE_NAME = "trading-note-v18";
+const CACHE_NAME = "trading-note-v19";
 const APP_SHELL = [
   "./index.html",
   "./styles.css?v=18",
-  "./app.js?v=18",
+  "./app.js?v=19",
   "./manifest.json",
   "./reset.html",
   "./assets/bunnyeap-symbol-tight.png",

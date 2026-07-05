@@ -63,8 +63,17 @@ function saveRecords(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
+function parseMoney(value) {
+  const normalized = String(value ?? "").replace(/,/g, "").trim();
+  if (!normalized) {
+    return NaN;
+  }
+
+  return Number(normalized);
+}
+
 function formatPrice(value) {
-  const number = Number(value);
+  const number = parseMoney(value);
   if (!Number.isFinite(number) || value === "" || value == null) {
     return "-";
   }
@@ -75,12 +84,43 @@ function formatPrice(value) {
 }
 
 function calculateReturn(buyPrice, targetPrice) {
-  const buy = Number(buyPrice);
-  const target = Number(targetPrice);
+  const buy = parseMoney(buyPrice);
+  const target = parseMoney(targetPrice);
   if (!buy || !target) {
     return 0;
   }
   return ((target - buy) / buy) * 100;
+}
+
+function groupDigits(digits) {
+  const normalized = digits.replace(/^0+(?=\d)/, "");
+  return normalized.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatMoneyText(value) {
+  const cleaned = String(value ?? "").replace(/[^\d.]/g, "");
+  if (!cleaned) {
+    return "";
+  }
+
+  const dotIndex = cleaned.indexOf(".");
+  if (dotIndex >= 0) {
+    const integerPart = cleaned.slice(0, dotIndex);
+    const decimalPart = cleaned.slice(dotIndex + 1).replace(/\./g, "");
+    return `${groupDigits(integerPart) || "0"}.${decimalPart}`;
+  }
+
+  return groupDigits(cleaned);
+}
+
+function normalizeMoneyValue(value) {
+  return String(value ?? "").replace(/,/g, "").trim();
+}
+
+function handleMoneyInput(event) {
+  const input = event.target;
+  input.value = formatMoneyText(input.value);
+  updateReturnPreview();
 }
 
 function createRecordId() {
@@ -121,7 +161,7 @@ function updateChecklistState() {
 function updateReturnPreview() {
   const rate = calculateReturn(buyPriceInput.value, targetPriceInput.value);
   const sign = rate > 0 ? "+" : "";
-  const buyAmount = Number(buyAmountInput.value);
+  const buyAmount = parseMoney(buyAmountInput.value);
   const stopRate = calculateReturn(buyPriceInput.value, stopPriceInput.value);
   const stopSign = stopRate > 0 ? "+" : "";
   const previewParts = [`예상 수익률 ${sign}${rate.toFixed(2)}%`];
@@ -332,10 +372,10 @@ function handleSubmit(event) {
     id: createRecordId(),
     symbol: symbolInput.value.trim(),
     reason: reasonInput.value.trim(),
-    buyPrice: buyPriceInput.value,
-    buyAmount: buyAmountInput.value,
-    targetPrice: targetPriceInput.value,
-    stopPrice: stopPriceInput.value,
+    buyPrice: normalizeMoneyValue(buyPriceInput.value),
+    buyAmount: normalizeMoneyValue(buyAmountInput.value),
+    targetPrice: normalizeMoneyValue(targetPriceInput.value),
+    stopPrice: normalizeMoneyValue(stopPriceInput.value),
     stopReason: stopReasonInput.value.trim(),
     chart: chartDataUrl,
     similarChart: similarChartDataUrl,
@@ -400,10 +440,10 @@ registerServiceWorker();
 checklist.addEventListener("change", updateChecklistState);
 chartInput.addEventListener("change", handleChartChange);
 similarChartInput.addEventListener("change", handleSimilarChartChange);
-buyPriceInput.addEventListener("input", updateReturnPreview);
-buyAmountInput.addEventListener("input", updateReturnPreview);
-targetPriceInput.addEventListener("input", updateReturnPreview);
-stopPriceInput.addEventListener("input", updateReturnPreview);
+buyPriceInput.addEventListener("input", handleMoneyInput);
+buyAmountInput.addEventListener("input", handleMoneyInput);
+targetPriceInput.addEventListener("input", handleMoneyInput);
+stopPriceInput.addEventListener("input", handleMoneyInput);
 tradeForm.addEventListener("submit", handleSubmit);
 resetButton.addEventListener("click", resetTradeForm);
 toggleRecordsButton.addEventListener("click", toggleRecords);

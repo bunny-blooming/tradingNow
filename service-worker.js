@@ -1,7 +1,7 @@
-const CACHE_NAME = "trading-note-v20";
+const CACHE_NAME = "trading-note-v21";
 const APP_SHELL = [
   "./index.html",
-  "./styles.css?v=20",
+  "./styles.css?v=21",
   "./app.js?v=19",
   "./manifest.json",
   "./reset.html",

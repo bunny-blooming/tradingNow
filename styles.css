@@ -236,7 +236,7 @@ textarea:focus {
 .chart-drop {
   position: relative;
   display: grid;
-  height: 150px;
+  height: 190px;
   min-height: 0;
   overflow: hidden;
   place-items: center;
@@ -460,8 +460,8 @@ textarea:focus {
 
 .record-chart-frame {
   width: 100%;
-  height: 190px;
-  max-height: 190px;
+  height: 230px;
+  max-height: 230px;
   overflow: hidden;
   border-radius: 8px;
   background: #fff;
@@ -479,8 +479,8 @@ textarea:focus {
 }
 
 .record-similar-chart .record-chart-frame {
-  height: 150px;
-  max-height: 150px;
+  height: 190px;
+  max-height: 190px;
 }
 
 .record-prices {
@@ -529,17 +529,17 @@ textarea:focus {
   }
 
   .chart-drop {
-    height: 210px;
+    height: 260px;
   }
 
   .record-chart-frame {
-    height: 250px;
-    max-height: 250px;
+    height: 310px;
+    max-height: 310px;
   }
 
   .record-similar-chart .record-chart-frame {
-    height: 190px;
-    max-height: 190px;
+    height: 240px;
+    max-height: 240px;
   }
 
   .record-prices {
@@ -567,16 +567,16 @@ textarea:focus {
   }
 
   .chart-drop {
-    height: 132px;
+    height: 180px;
   }
 
   .record-chart-frame {
-    height: 168px;
-    max-height: 168px;
+    height: 220px;
+    max-height: 220px;
   }
 
   .record-similar-chart .record-chart-frame {
-    height: 132px;
-    max-height: 132px;
+    height: 180px;
+    max-height: 180px;
   }
 }
